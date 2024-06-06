@@ -1,7 +1,7 @@
 # bot.py
 import os
+import re
 import discord
-from discord import Intents
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -18,28 +18,34 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
 @bot.command(name='result')
-async def result(ctx, winning_pair: str, *losing_pairs: str):
-    # Split the winning pair into player and commander
-    winning_player, winning_commander = winning_pair.strip('[]').split(', ')
+async def result(ctx, *, arg: str):
+    # Use regex to extract the pairs from the input string
+    pattern = re.compile(r'\[(.*?)\]')
+    matches = pattern.findall(arg)
+
+    if not matches or len(matches) < 2:
+        await ctx.send("Invalid input format. Please use: /result [Winning player, Winning Commander] [Losing player 1, Winning commander 1] [Losing player 2, Winning commander 2] [Losing player 3, Winning commander 3]")
+        return
+
+    # Extract the winning pair
+    winning_pair = matches[0]
+    winning_player, winning_commander = map(str.strip, winning_pair.split(','))
 
     # Print the winning pair
     print(f"Winning player: {winning_player}")
     print(f"Winning commander: {winning_commander}")
 
+    # Prepare the response message
+    response = f"**Winner:**\n{winning_player} with {winning_commander}\n**Losers:**\n"
+
     # Process and print each losing pair
-    for pair in losing_pairs:
-        losing_player, losing_commander = pair.strip('[]').split(', ')
+    for pair in matches[1:]:
+        losing_player, losing_commander = map(str.strip, pair.split(','))
         print(f"Losing player: {losing_player}")
-        print(f"Winning commander against: {losing_commander}")
+        print(f"Losing commander: {losing_commander}")
+        response += f"{losing_player} with {losing_commander}\n"
 
     # Respond in Discord
-    response = f"Winner: {winning_player} with {winning_commander}\n"
-    response += "Losers:\n"
-    for pair in losing_pairs:
-        losing_player, losing_commander = pair.strip('[]').split(', ')
-        response += f"{losing_player} (Commander: {losing_commander})\n"
-
     await ctx.send(response)
-
 
 bot.run(TOKEN)
