@@ -22,6 +22,3 @@ async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
 client.run(TOKEN)
-
-# .env
-DISCORD_TOKEN=MTI0ODMwMTU4MTcxMTk2NjI0OA.GZjxqY.EYl4w9AgSVmJ82fy7NojYpFLKBfGz2ul27B1L0
